@@ -1,6 +1,6 @@
 use super::{
-    BackupAction, CanvasAction, DrawAction, EditAction, GraphAction, HelpAction, KeyCombo,
-    Keybinds, ListAction, OutlineAction, SetupAction,
+    BackupAction, CanvasAction, DrawAction, EditAction, GlobalAction, GraphAction, HelpAction,
+    KeyCombo, Keybinds, ListAction, OutlineAction, SetupAction,
 };
 use crate::config::KeybindPreset;
 
@@ -270,6 +270,13 @@ const DEFAULT_SETUP: &[(SetupAction, &[&str])] = &[
     (SetupAction::Finish, &["Esc"]),
 ];
 
+const DEFAULT_GLOBAL: &[(GlobalAction, &[&str])] = &[
+    (GlobalAction::ToggleHelp, &["F1"]),
+    (GlobalAction::ToggleQuickKeybinds, &["F2"]),
+    (GlobalAction::ToggleMessages, &["F3"]),
+    (GlobalAction::Redraw, &["F5"]),
+];
+
 impl Default for Keybinds {
     fn default() -> Self {
         Self {
@@ -282,6 +289,7 @@ impl Default for Keybinds {
             backup: build(DEFAULT_BACKUP),
             outline: build(DEFAULT_OUTLINE),
             setup: build(DEFAULT_SETUP),
+            global: build(DEFAULT_GLOBAL),
         }
     }
 }
@@ -598,6 +606,7 @@ impl KeybindPreset {
             || Self::has_multi_seq(&kb.backup)
             || Self::has_multi_seq(&kb.outline)
             || Self::has_multi_seq(&kb.setup)
+            || Self::has_multi_seq(&kb.global)
     }
 
     fn has_multi_seq<A>(map: &std::collections::HashMap<A, Vec<super::KeyCombo>>) -> bool {
