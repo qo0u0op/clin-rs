@@ -51,7 +51,7 @@ pub fn draw_dashboard(
 
     let theme = &state.theme;
     let kb = &state.keybinds;
-    let hints_items = vec![
+    let mut hints_items = vec![
         (kb.display_backup(BackupAction::StageFile), "stage"),
         (kb.display_backup(BackupAction::EnterCommit), "commit"),
         (kb.display_backup(BackupAction::Push), "push"),
@@ -59,12 +59,15 @@ pub fn draw_dashboard(
         (kb.display_backup(BackupAction::Refresh), "refresh"),
         (kb.display_backup(BackupAction::OpenSettings), "settings"),
         (kb.backup_keys_display(BackupAction::Back), "back"),
-        (
-            format!("F1/{}", kb.backup_keys_display(BackupAction::Help)),
-            "help",
-        ),
-        ("F2".to_string(), "keybinds"),
     ];
+    let help_label = kb.help_hint(&kb.backup_keys_display(BackupAction::Help));
+    if !help_label.is_empty() {
+        hints_items.push((help_label, "help"));
+    }
+    let keybinds_label = kb.keybinds_hint();
+    if !keybinds_label.is_empty() {
+        hints_items.push((keybinds_label, "keybinds"));
+    }
     let hint_line = crate::ui::format_keybind_hints(theme, &hints_items);
     let mut ctx = crate::statusline::StatuslineContext::for_overlay(config, ViewMode::Backup);
     ctx.area = Some(footer_area);

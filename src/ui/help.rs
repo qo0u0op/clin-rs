@@ -316,12 +316,12 @@ pub fn draw_help_view(frame: &mut Frame, app: &mut App) {
         ),
         (kb.display_help(HelpAction::Search), "search"),
         (kb.display_help(HelpAction::Reroll), "reroll tips"),
-        (
-            format!("F1/{}", kb.help_keys_display(HelpAction::Close)),
-            "close",
-        ),
-        ("F2".to_string(), "keybinds"),
+        (kb.help_keys_display(HelpAction::Close), "close"),
     ];
+    let keybinds_label = kb.keybinds_hint();
+    if !keybinds_label.is_empty() {
+        hints_items.push((keybinds_label, "keybinds"));
+    }
     if !crate::ui::help_content::tab_popup_descriptions(app.help_tab).is_empty() {
         hints_items.push(("n/N".to_string(), "cycle popup"));
     }
@@ -1183,19 +1183,22 @@ fn draw_help_tips_pane(
             }
         }
     }
-    // Fixed tip: F2 keybinds overlay (always shown)
-    lines.push(Line::default());
-    lines.push(Line::from(Span::styled(
-        "Quick keybinds",
-        Style::default()
-            .fg(theme.success)
-            .add_modifier(Modifier::BOLD),
-    )));
-    lines.push(Line::from(render_tip_body(
-        "Press `` F2 `` in any view to toggle a **keybinds overlay** showing all available shortcuts for the current context.",
-        keybinds,
-        theme,
-    )));
+    // Fixed tip: keybinds overlay (hidden when toggle_quick_keybinds = []).
+    let overlay_key = keybinds.keybinds_hint();
+    if !overlay_key.is_empty() {
+        lines.push(Line::default());
+        lines.push(Line::from(Span::styled(
+            "Quick keybinds",
+            Style::default()
+                .fg(theme.success)
+                .add_modifier(Modifier::BOLD),
+        )));
+        lines.push(Line::from(render_tip_body(
+            "Press {global:ToggleQuickKeybinds} in any view to toggle a **keybinds overlay** showing all available shortcuts for the current context.",
+            keybinds,
+            theme,
+        )));
+    }
 
     let p = Paragraph::new(lines)
         .wrap(Wrap::default())
@@ -1323,6 +1326,18 @@ pub(crate) fn resolve_tip_key(token: &str, kb: &Keybinds) -> String {
     let Some((scope, action)) = token.split_once(':') else {
         return format!("[ERR:{}]", token);
     };
+
+    // Global scope — [global] section (F1/F2/F3/F5 by default, configurable).
+    // Empty string when disabled via `= []`; callers skip or show fallback.
+    if scope == "global" {
+        return match action {
+            "ToggleHelp" => kb.global_keys_display(GlobalAction::ToggleHelp),
+            "ToggleQuickKeybinds" => kb.global_keys_display(GlobalAction::ToggleQuickKeybinds),
+            "ToggleMessages" => kb.global_keys_display(GlobalAction::ToggleMessages),
+            "Redraw" => kb.global_keys_display(GlobalAction::Redraw),
+            _ => format!("[ERR:{}]", token),
+        };
+    }
 
     match scope {
         "list" => match action {

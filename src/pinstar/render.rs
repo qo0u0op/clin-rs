@@ -820,7 +820,7 @@ pub fn draw_pinstar_view(
         1,
     );
     let hint_line = if state.footer_hint.is_empty() {
-        let hints_items = vec![
+        let mut hints_items = vec![
             (
                 format!(
                     "{}/{}",
@@ -845,15 +845,17 @@ pub fn draw_pinstar_view(
                 state.keybinds.canvas_keys_display(CanvasAction::Quit),
                 "back",
             ),
-            (
-                format!(
-                    "F1/{}",
-                    state.keybinds.canvas_keys_display(CanvasAction::Help)
-                ),
-                "help",
-            ),
-            ("F2".to_string(), "keybinds"),
         ];
+        let help_label = state
+            .keybinds
+            .help_hint(&state.keybinds.canvas_keys_display(CanvasAction::Help));
+        if !help_label.is_empty() {
+            hints_items.push((help_label, "help"));
+        }
+        let keybinds_label = state.keybinds.keybinds_hint();
+        if !keybinds_label.is_empty() {
+            hints_items.push((keybinds_label, "keybinds"));
+        }
         crate::ui::format_keybind_hints(theme, &hints_items)
     } else {
         Line::from(vec![Span::styled(

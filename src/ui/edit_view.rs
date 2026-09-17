@@ -414,7 +414,7 @@ pub fn draw_edit_view(frame: &mut Frame, app: &mut App, focus: EditFocus) {
         }
     }
     let kb = &app.keybinds;
-    let hints_items = vec![
+    let mut hints_items = vec![
         (kb.display_edit(EditAction::CycleFocus), "focus"),
         (
             kb.display_edit(EditAction::ToggleMarkdownPreview),
@@ -425,9 +425,15 @@ pub fn draw_edit_view(frame: &mut Frame, app: &mut App, focus: EditFocus) {
         (kb.display_edit(EditAction::Find), "find"),
         (kb.display_edit(EditAction::ToggleWrap), "wrap"),
         (kb.edit_keys_display(EditAction::Back), "back"),
-        ("F1".to_string(), "help"),
-        ("F2".to_string(), "keybinds"),
     ];
+    let help_label = kb.help_hint("");
+    if !help_label.is_empty() {
+        hints_items.push((help_label, "help"));
+    }
+    let keybinds_label = kb.keybinds_hint();
+    if !keybinds_label.is_empty() {
+        hints_items.push((keybinds_label, "keybinds"));
+    }
     let default_hints = format_keybind_hints(&app.app_theme, &hints_items);
     let hint = default_hints;
     let note = crate::statusline::active_note(app, ViewMode::Edit);

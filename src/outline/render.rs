@@ -243,7 +243,7 @@ pub fn draw_outline(
     }
 
     // 3. Draw Hint line
-    let hints_items = vec![
+    let mut hints_items = vec![
         (
             format!(
                 "{}/{}",
@@ -258,12 +258,15 @@ pub fn draw_outline(
         ),
         (keybinds.display_outline(OutlineAction::Open), "jump"),
         (keybinds.outline_keys_display(OutlineAction::Back), "back"),
-        (
-            format!("F1/{}", keybinds.outline_keys_display(OutlineAction::Help)),
-            "help",
-        ),
-        ("F2".to_string(), "keybinds"),
     ];
+    let help_label = keybinds.help_hint(&keybinds.outline_keys_display(OutlineAction::Help));
+    if !help_label.is_empty() {
+        hints_items.push((help_label, "help"));
+    }
+    let keybinds_label = keybinds.keybinds_hint();
+    if !keybinds_label.is_empty() {
+        hints_items.push((keybinds_label, "keybinds"));
+    }
     let hint = crate::ui::format_keybind_hints(theme, &hints_items);
     let mut ctx = crate::statusline::StatuslineContext::for_overlay(config, ViewMode::Outline);
     ctx.area = Some(hint_area);

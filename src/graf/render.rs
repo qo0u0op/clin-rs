@@ -904,7 +904,7 @@ pub fn draw_graph_view(
             area.width,
             1,
         );
-        let hints_items = vec![
+        let mut hints_items = vec![
             (
                 format!(
                     "{}/{}",
@@ -924,12 +924,15 @@ pub fn draw_graph_view(
             (keybinds.display_graph(GraphAction::ToggleLegend), "labels"),
             (keybinds.display_graph(GraphAction::AutoFit), "fit"),
             (keybinds.graph_keys_display(GraphAction::Quit), "quit"),
-            (
-                format!("F1/{}", keybinds.graph_keys_display(GraphAction::Help)),
-                "help",
-            ),
-            ("F2".to_string(), "keybinds"),
         ];
+        let help_label = keybinds.help_hint(&keybinds.graph_keys_display(GraphAction::Help));
+        if !help_label.is_empty() {
+            hints_items.push((help_label, "help"));
+        }
+        let keybinds_label = keybinds.keybinds_hint();
+        if !keybinds_label.is_empty() {
+            hints_items.push((keybinds_label, "keybinds"));
+        }
         let hint_line = crate::ui::format_keybind_hints(app_theme, &hints_items);
         let mut ctx = crate::statusline::StatuslineContext::for_overlay(config, ViewMode::Graph);
         ctx.area = Some(status_area);

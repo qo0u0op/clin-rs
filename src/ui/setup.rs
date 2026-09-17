@@ -216,8 +216,22 @@ pub fn draw_setup_view(frame: &mut Frame, app: &mut App) {
         layout.options,
     );
 
+    // Setup hint: global ToggleHelp / ToggleQuickKeybinds (F1/F2 by default).
+    // Skips disabled ([]) bindings so the text never mentions an inactive key.
+    let setup_hint = {
+        let help_key = app.keybinds.help_hint("");
+        let kb_key = app.keybinds.keybinds_hint();
+        match (help_key.is_empty(), kb_key.is_empty()) {
+            (true, true) => "Press ? for help.".to_string(),
+            (true, false) => format!("Remember: press {kb_key} for keybinds."),
+            (false, true) => format!("Remember: press {help_key} for help."),
+            (false, false) => {
+                format!("Remember: press {help_key} for help or {kb_key} for keybinds.")
+            }
+        }
+    };
     frame.render_widget(
-        Paragraph::new("Remember: press F1 for help or F2 for keybinds.")
+        Paragraph::new(setup_hint)
             .style(
                 Style::default()
                     .fg(theme.muted)

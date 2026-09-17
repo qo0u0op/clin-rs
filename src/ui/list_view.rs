@@ -1754,8 +1754,12 @@ pub fn draw_list_view(frame: &mut Frame, app: &mut App) {
     }
     let kb = &app.keybinds;
     let is_grid = app.list.notes_layout == crate::config::NotesLayout::Grid;
+    // Global [global] keys (F1/F2 by default, configurable, empty when disabled).
+    let help_grid = kb.help_hint(&kb.list_keys_display(ListAction::Help));
+    let help_list = kb.help_hint(&kb.list_keys_display(ListAction::Help));
+    let keybinds_label = kb.keybinds_hint();
     let hints_items = if is_grid {
-        vec![
+        let mut items = vec![
             (
                 format!(
                     "{}/{}/{}/{}",
@@ -1768,14 +1772,16 @@ pub fn draw_list_view(frame: &mut Frame, app: &mut App) {
             ),
             (kb.display_list(ListAction::Open), "open"),
             (kb.list_keys_display(ListAction::Quit), "quit"),
-            (
-                format!("F1/{}", kb.list_keys_display(ListAction::Help)),
-                "help",
-            ),
-            ("F2".to_string(), "keybinds"),
-        ]
+        ];
+        if !help_grid.is_empty() {
+            items.push((help_grid, "help"));
+        }
+        if !keybinds_label.is_empty() {
+            items.push((keybinds_label.clone(), "keybinds"));
+        }
+        items
     } else {
-        vec![
+        let mut items = vec![
             (
                 format!(
                     "{}/{}",
@@ -1788,12 +1794,14 @@ pub fn draw_list_view(frame: &mut Frame, app: &mut App) {
             (kb.display_list(ListAction::CollapseAll), "collapse"),
             (kb.display_list(ListAction::ExpandAll), "expand"),
             (kb.list_keys_display(ListAction::Quit), "quit"),
-            (
-                format!("F1/{}", kb.list_keys_display(ListAction::Help)),
-                "help",
-            ),
-            ("F2".to_string(), "keybinds"),
-        ]
+        ];
+        if !help_list.is_empty() {
+            items.push((help_list, "help"));
+        }
+        if !keybinds_label.is_empty() {
+            items.push((keybinds_label.clone(), "keybinds"));
+        }
+        items
     };
     let default_hints = format_keybind_hints(&app.app_theme, &hints_items);
 

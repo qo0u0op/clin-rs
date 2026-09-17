@@ -134,7 +134,11 @@ pub fn draw_canvas(
         area.width,
         1,
     );
-    let hints_items = [
+    let help_label = app
+        .keybinds
+        .help_hint(&app.keybinds.draw_keys_display(DrawAction::Help));
+    let keybinds_label = app.keybinds.keybinds_hint();
+    let mut hints_vec = vec![
         (
             app.keybinds.display_draw(DrawAction::SelectCursorTool),
             "cursor",
@@ -156,12 +160,14 @@ pub fn draw_canvas(
             "erase",
         ),
         (app.keybinds.draw_keys_display(DrawAction::Quit), "back"),
-        (
-            format!("F1/{}", app.keybinds.draw_keys_display(DrawAction::Help)),
-            "help",
-        ),
-        ("F2".to_string(), "keybinds"),
     ];
+    if !help_label.is_empty() {
+        hints_vec.push((help_label, "help"));
+    }
+    if !keybinds_label.is_empty() {
+        hints_vec.push((keybinds_label, "keybinds"));
+    }
+    let hints_items = hints_vec;
     let hint_line = crate::ui::format_keybind_hints(&app.theme, &hints_items);
     let mut ctx = crate::statusline::StatuslineContext::for_overlay(config, ViewMode::Draw);
     ctx.area = Some(status_area);

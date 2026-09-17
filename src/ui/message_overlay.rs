@@ -32,11 +32,18 @@ pub fn draw_message_overlay(
         theme.warning
     };
 
-    // --- Title ---
-    let title = if app.messages.force_open {
-        " [F3] Messages (pinned) "
+    // --- Title: global toggle_messages key (F3 by default, configurable) ---
+    let msg_key = app.keybinds.messages_hint();
+    let title = if msg_key.is_empty() {
+        if app.messages.force_open {
+            " Messages (pinned) ".to_string()
+        } else {
+            " Messages ".to_string()
+        }
+    } else if app.messages.force_open {
+        format!(" [{msg_key}] Messages (pinned) ")
     } else {
-        " [F3] Messages "
+        format!(" [{msg_key}] Messages ")
     };
     let title_width = title.chars().count() as u16;
 

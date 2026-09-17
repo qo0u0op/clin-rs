@@ -229,6 +229,37 @@ impl Keybinds {
         m.resolve(event, &filtered, seq, counts)
     }
 
+    /// Join two key labels, skipping empties (disabled `[]` bindings).
+    /// Used to combine a `[global]` key with a scope-specific key in hint bars,
+    /// e.g. global `F1` + scope `?` -> `"F1/?"`.
+    fn join_key_labels(a: &str, b: &str) -> String {
+        match (a.is_empty(), b.is_empty()) {
+            (true, true) => String::new(),
+            (true, false) => b.to_string(),
+            (false, true) => a.to_string(),
+            (false, false) => format!("{a}/{b}"),
+        }
+    }
+
+    /// Hint label for help: global `toggle_help` + scope-specific help key.
+    /// Returns `""` only when both are disabled.
+    pub fn help_hint(&self, scope_help: &str) -> String {
+        let global = self.global_keys_display(GlobalAction::ToggleHelp);
+        Self::join_key_labels(&global, scope_help)
+    }
+
+    /// Hint label for the keybinds overlay (`toggle_quick_keybinds`).
+    /// Returns `""` when disabled via `toggle_quick_keybinds = []`.
+    pub fn keybinds_hint(&self) -> String {
+        self.global_keys_display(GlobalAction::ToggleQuickKeybinds)
+    }
+
+    /// Hint label for the messages overlay (`toggle_messages`).
+    /// Returns `""` when disabled via `toggle_messages = []`.
+    pub fn messages_hint(&self) -> String {
+        self.global_keys_display(GlobalAction::ToggleMessages)
+    }
+
     /// Pick the best key combo to display in hint bars.
     /// Skips arrow keys, function keys, and page-nav keys to prefer
     /// letter keys (j/k) or conventional keys (Enter, Esc, Tab).
